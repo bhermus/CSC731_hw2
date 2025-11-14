@@ -19,13 +19,11 @@ def main():
     print(f"Training dataset size: {len(train_dataset)}")
     print(f"Test dataset size: {len(test_dataset)}")
 
-    dummy_input = torch.randn(64, 1, 28, 28)
-
     model = MyCnn().to(DEVICE)
-    output = model(dummy_input)
 
-    print(f"Input shape: {dummy_input.shape}")
-    print(f"Output shape (logits for 10 classes): {output.shape}")
+    criterion = torch.nn.CrossEntropyLoss()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
 
 if __name__ == '__main__':
