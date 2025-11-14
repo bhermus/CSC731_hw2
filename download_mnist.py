@@ -7,12 +7,20 @@ def load_mnist_dataset(root_dir="./data"):
         root=root_dir,
         train=True,
         download=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=0.1307, std=0.3081)
+        ])
     )
 
     test_dataset = datasets.MNIST(
         root=root_dir,
         train=False,
         download=True,
+        transform=transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=0.1307, std=0.3081)
+        ])
     )
 
     train_size = 50_000
@@ -23,4 +31,4 @@ def load_mnist_dataset(root_dir="./data"):
         [train_size, validation_size]
     )
 
-    return train_dataset, test_dataset
+    return train_dataset, test_dataset, validation_dataset
