@@ -24,6 +24,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     for epoch in range(NUM_EPOCHS):
+        total_loss = 0
         for batch_idx, (images, labels) in enumerate(train_loader):
             images = images.to(DEVICE)
             labels = labels.to(DEVICE)
@@ -33,6 +34,10 @@ def main():
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+
+            total_loss += loss.item()
+        avg_loss = total_loss / len(train_loader)
+        print(f"Loss after epoch {epoch + 1}/{NUM_EPOCHS}: {avg_loss}")
 
 
 if __name__ == '__main__':
