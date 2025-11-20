@@ -11,7 +11,7 @@ BATCH_SIZE = 64
 
 
 def main():
-    train_dataset, test_dataset = load_mnist_dataset()
+    train_dataset, test_dataset, validation_dataset = load_mnist_dataset()
     batch_size = BATCH_SIZE
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -20,10 +20,19 @@ def main():
     print(f"Test dataset size: {len(test_dataset)}")
 
     model = MyCnn().to(DEVICE)
-
     criterion = torch.nn.CrossEntropyLoss()
-
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+    for epoch in range(NUM_EPOCHS):
+        for batch_idx, (images, labels) in enumerate(train_loader):
+            images = images.to(DEVICE)
+            labels = labels.to(DEVICE)
+            optimizer.zero_grad()
+
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
 
 
 if __name__ == '__main__':
