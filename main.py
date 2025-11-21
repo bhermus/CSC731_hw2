@@ -24,14 +24,14 @@ def validate(model, val_loader, criterion, device):
             outputs = model(images)
             loss = criterion(outputs, labels)
             total_loss += loss.item()
-        _, predicted = torch.max(outputs, 1)
-        for i in range(len(predicted)):
-            total += 1
-            if predicted[i] == labels[i]:
-                correct += 1
+            _, predicted = torch.max(outputs, 1)
+            correct += (predicted == labels).sum().item()
+            total += len(labels)
     avg_loss = total_loss / len(val_loader)
     accuracy = correct / total
+
     return avg_loss, accuracy
+
 
 def main():
     train_dataset, test_dataset, validation_dataset = load_mnist_dataset()
@@ -61,10 +61,9 @@ def main():
 
             total_loss += loss.item()
         avg_loss = total_loss / len(train_loader)
-        print(f"Loss after epoch {epoch + 1}/{NUM_EPOCHS}: {avg_loss}")
-
-    avg_loss, accuracy = validate(model, val_loader, criterion, DEVICE)
-    print(avg_loss, accuracy)
+        val_loss, accuracy = validate(model, val_loader, criterion, DEVICE)
+        print(f"Epoch {epoch + 1}/{NUM_EPOCHS}")
+        print(f"Loss: {avg_loss}, Val Loss: {val_loss}, Accuracy: {accuracy}")
 
 
 if __name__ == '__main__':
