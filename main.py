@@ -1,8 +1,10 @@
+import argparse
 import torch
 from torch.utils.data import DataLoader
 
 from cnn import MyCnn
 from download_mnist import load_mnist_dataset
+from lstm import MyLstm
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUM_EPOCHS = 5
@@ -34,6 +36,12 @@ def validate(model, val_loader, criterion, device):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--network", type=str, required=True, choices=["cnn", "lstm"],
+                        help="Choose a network, either CNN or LSTM")
+    args = parser.parse_args()
+    print(f"Running using {args.network}")
+
     train_dataset, test_dataset, validation_dataset = load_mnist_dataset()
     batch_size = BATCH_SIZE
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -43,7 +51,12 @@ def main():
     print(f"Training dataset size: {len(train_dataset)}")
     print(f"Test dataset size: {len(test_dataset)}")
 
-    model = MyCnn().to(DEVICE)
+    model = None
+    if args.network.lower() == "cnn":
+        model = MyCnn().to(DEVICE)
+    elif args.network.lower() == "lstm":
+        model = MyLstm().to(DEVICE)
+
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
