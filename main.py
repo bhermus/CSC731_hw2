@@ -45,6 +45,8 @@ def main():
                         help=f"Learning rate (default: {LEARNING_RATE})")
     parser.add_argument("--batch-size", type=int, default=BATCH_SIZE,
                         help=f"Batch size for training (default: {BATCH_SIZE})")
+    parser.add_argument("--patience", type=int, default=3,
+                        help="Early stopping patience - stop if val loss doesn't improve for this many epochs")
 
     args = parser.parse_args()
     print(f"Running using {args.network}")
@@ -67,6 +69,11 @@ def main():
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
+    # overfitting prevention vars
+    best_val_loss = float('inf')
+    patience_counter = 0
+    best_model_state = None
+
     for epoch in range(args.epochs):
         total_loss = 0
         for batch_idx, (images, labels) in enumerate(train_loader):
@@ -84,6 +91,24 @@ def main():
         val_loss, accuracy = validate(model, val_loader, criterion, DEVICE)
         print(f"Epoch {epoch + 1}/{args.epochs}")
         print(f"Loss: {avg_loss}, Val Loss: {val_loss}, Accuracy: {accuracy}")
+
+        # early stopping check
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            patience_counter = 0
+            best_model_state = model.state_dict().copy()
+            print(f"  -- New best validation loss: {best_val_loss:.4f}")
+        else:
+            patience_counter += 1
+            print(f"  -- No improvement for {patience_counter} epoch(s)")
+
+            if patience_counter >= args.patience:
+                print(f"\nEarly stopping triggered after {epoch + 1} epochs")
+                break
+
+    if best_model_state is not None:
+        model.load_state_dict(best_model_state)
+        print(f"\nRestored model from best validation loss: {best_val_loss:.4f}")
 
     print("Final test stats:")
     test_loss, test_accuracy = validate(model, test_loader, criterion, DEVICE)
