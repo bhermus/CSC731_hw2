@@ -78,6 +78,10 @@ def main():
         print(f"Epoch {epoch + 1}/{NUM_EPOCHS}")
         print(f"Loss: {avg_loss}, Val Loss: {val_loss}, Accuracy: {accuracy}")
 
+    print("Final test stats:")
+    test_loss, test_accuracy = validate(model, test_loader, criterion, DEVICE)
+    print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_accuracy:.4f}")
+
 
 if __name__ == '__main__':
     main()
