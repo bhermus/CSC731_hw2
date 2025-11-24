@@ -39,11 +39,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--network", type=str, required=True, choices=["cnn", "lstm"],
                         help="Choose a network, either CNN or LSTM")
+    parser.add_argument("--epochs", type=int, default=NUM_EPOCHS,
+                        help=f"Number of training epochs (default: {NUM_EPOCHS})")
+    parser.add_argument("--learning_rate", type=float, default=LEARNING_RATE,
+                        help=f"Learning rate (default: {LEARNING_RATE})")
+    parser.add_argument("--batch-size", type=int, default=BATCH_SIZE,
+                        help=f"Batch size for training (default: {BATCH_SIZE})")
+
     args = parser.parse_args()
     print(f"Running using {args.network}")
 
     train_dataset, test_dataset, validation_dataset = load_mnist_dataset()
-    batch_size = BATCH_SIZE
+    batch_size = args.batch_size
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     val_loader = DataLoader(validation_dataset, batch_size=batch_size, shuffle=False)
@@ -58,9 +65,9 @@ def main():
         model = MyLstm().to(DEVICE)
 
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
 
-    for epoch in range(NUM_EPOCHS):
+    for epoch in range(args.epochs):
         total_loss = 0
         for batch_idx, (images, labels) in enumerate(train_loader):
             images = images.to(DEVICE)
@@ -75,7 +82,7 @@ def main():
             total_loss += loss.item()
         avg_loss = total_loss / len(train_loader)
         val_loss, accuracy = validate(model, val_loader, criterion, DEVICE)
-        print(f"Epoch {epoch + 1}/{NUM_EPOCHS}")
+        print(f"Epoch {epoch + 1}/{args.epochs}")
         print(f"Loss: {avg_loss}, Val Loss: {val_loss}, Accuracy: {accuracy}")
 
     print("Final test stats:")
